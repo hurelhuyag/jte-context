@@ -1,8 +1,8 @@
 # JTE Template utilities. ![ci badge](https://github.com/hurelhuyag/jte-context/actions/workflows/ci.yaml/badge.svg)
 
-```
-TemplateUtils::formatMessage
-TemplateUtils::formatDate
+```java
+Context::formatMessage
+Context::formatDate
 ```
 
 ## Example
@@ -10,7 +10,7 @@ TemplateUtils::formatDate
 Example `template.jte` file
 ```jte
 @import io.github.hurelhuyag.jtecontext.Context
-@param TemplateUtils ctx
+@param Context ctx
 <!DOCTYPE html>
 <html lang="en">
 <head>

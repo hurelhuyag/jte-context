@@ -1,4 +1,4 @@
-# JTE Template utilities. 
+# JTE Template utilities. ![ci badge](https://github.com/hurelhuyag/jte-context/actions/workflows/ci.yaml/badge.svg)
 
 ```
 TemplateUtils::formatMessage

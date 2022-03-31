@@ -67,4 +67,10 @@ public class Main {
 
 ## Benchmark
 
-- benchmark
+```log
+Benchmark                                        Mode  Cnt     Score      Error   Units
+BenchmarkMessageFormatting.ourMessageFormat     thrpt    6  6062.607 ± 1667.703  ops/ms
+BenchmarkMessageFormatting.springMessageFormat  thrpt    6   187.965 ±   16.492  ops/ms
+```
+
+https://github.com/hurelhuyag/jte-context-benchmark

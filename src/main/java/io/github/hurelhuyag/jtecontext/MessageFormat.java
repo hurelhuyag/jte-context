@@ -13,15 +13,19 @@ public final class MessageFormat {
     private static final Pattern PARAM_PATTERN = Pattern.compile("\\{(\\d+)}");
 
     private final List<String> fragments;
+    private final int[] paramOrders;
 
     public MessageFormat(String value) {
         var fragments = new ArrayList<String>();
+        var paramOrders = new ArrayList<Integer>();
         var matcher = PARAM_PATTERN.matcher(value);
         if (matcher.find()) {
             int startIndex = 0;
             do {
-                fragments.add(value.substring(startIndex, matcher.start()));
+                int endIndex = matcher.start();
+                fragments.add(value.substring(startIndex, endIndex));
                 startIndex = matcher.end();
+                paramOrders.add(Integer.valueOf(value.substring(endIndex+1, startIndex-1)));
             } while (matcher.find());
             fragments.add(value.substring(startIndex));
         } else {
@@ -29,38 +33,65 @@ public final class MessageFormat {
         }
         fragments.trimToSize();
         this.fragments = Collections.unmodifiableList(fragments);
+        this.paramOrders = paramOrders.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    public String apply() {
+        if (fragments.size() == 1) {
+            return fragments.get(0);
+        } else {
+            throw new IllegalArgumentException("MessageFormat expected " + (fragments.size() - 1) + " parameters. But provided none");
+        }
     }
 
     public Content apply(Object param1) {
         return output -> {
-            for (int i=0; i<fragments.size(); i++) {
-                output.writeContent(fragments.get(i));
-                if (i == 0) {
-                    writeParam(output, param1);
-                }
+            if (fragments.size() == 2) {
+                output.writeContent(fragments.get(0));
+                writeParam(output, param1);
+                output.writeContent(fragments.get(1));
+            } else {
+                throw new IllegalArgumentException("MessageFormat expected " + (fragments.size() - 1) + " parameters. But provided 1");
             }
         };
     }
 
     public Content apply(Object param1, Object param2) {
         return output -> {
-            for (int i=0; i<fragments.size(); i++) {
-                output.writeContent(fragments.get(i));
-                if (i == 0) {
-                    writeParam(output, param1);
-                } else if (i == 1) {
-                    writeParam(output, param2);
-                }
+            if (fragments.size() == 3) {
+                output.writeContent(fragments.get(0));
+                writeParam(output, paramOrders[0] == 0 ? param1 : param2);
+                output.writeContent(fragments.get(1));
+                writeParam(output, paramOrders[1] == 1 ? param2 : param1);
+                output.writeContent(fragments.get(2));
+            } else {
+                throw new IllegalArgumentException("MessageFormat expected " + (fragments.size() - 1) + " parameters. But provided 2");
             }
         };
     }
 
-    public Content apply(Object[] params) {
+    public Content apply(Object param1, Object param2, Object param3) {
+        return output -> {
+            if (fragments.size() == 4) {
+                output.writeContent(fragments.get(0));
+                writeParam(output, paramOrders[0] == 0 ? param1 : paramOrders[0] == 1 ? param2 : param3);
+                output.writeContent(fragments.get(1));
+                writeParam(output, paramOrders[1] == 1 ? param2 : paramOrders[0] == 0 ? param1 : param3);
+                output.writeContent(fragments.get(2));
+                writeParam(output, paramOrders[2] == 2 ? param3 : paramOrders[0] == 1 ? param2 : param1);
+                output.writeContent(fragments.get(3));
+            } else {
+                throw new IllegalArgumentException("MessageFormat expected " + (fragments.size() - 1) + " parameters. But provided 3");
+            }
+        };
+    }
+
+    public Content apply(Object... params) {
         return output -> {
             for (int i=0; i<fragments.size(); i++) {
                 output.writeContent(fragments.get(i));
                 if (params.length > i) {
-                    writeParam(output, params[i]);
+                    writeParam(output, params[paramOrders[i]]);
                 }
             }
         };
@@ -97,7 +128,7 @@ public final class MessageFormat {
         var sb = new StringBuilder();
         sb.append(fragments.get(0));
         for (int i=1; i<fragments.size(); i++) {
-            sb.append("{").append(i-1).append("}").append(fragments.get(i));
+            sb.append("{").append(paramOrders[i-1]).append("}").append(fragments.get(i));
         }
         return sb.toString();
     }

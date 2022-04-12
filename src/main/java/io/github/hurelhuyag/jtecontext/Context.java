@@ -19,6 +19,15 @@ public class Context {
         this.messageBundle = messageBundle;
     }
 
+    public String formatMessage(String key) {
+        var format = messageBundle.lookup(key, locale);
+        if (format != null) {
+            return format.apply();
+        } else {
+            return null;
+        }
+    }
+
     public Content formatMessage(String key, Object param1) {
         var format = messageBundle.lookup(key, locale);
         if (format != null) {
@@ -32,6 +41,15 @@ public class Context {
         var format = messageBundle.lookup(key, locale);
         if (format != null) {
             return format.apply(param1, param2);
+        } else {
+            return null;
+        }
+    }
+
+    public Content formatMessage(String key, Object param1, Object param2, Object param3) {
+        var format = messageBundle.lookup(key, locale);
+        if (format != null) {
+            return format.apply(param1, param2, param3);
         } else {
             return null;
         }
